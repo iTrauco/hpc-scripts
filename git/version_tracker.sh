@@ -48,7 +48,8 @@ get_comment_style() {
 }
 
 # Start in the current directory where the script is run from
-current_dir="$(pwd)"
+# current_dir="$(pwd)"
+current_dir="$PWD"
 
 # Main directory navigation and file selection loop
 main_loop() {
