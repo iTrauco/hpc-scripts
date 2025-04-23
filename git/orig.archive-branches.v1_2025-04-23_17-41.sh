@@ -1,23 +1,22 @@
-# NEW VERSION - Original backed up to: orig.archive-branches.v1_2025-04-23_17-41.sh 
+# Original file: archive-branches.sh 
 # Version date: Wed Apr 23 05:42:01 PM EDT 2025 
 # Git branch: enhancement/git-archive 
 # Last commit: Add GitHub repo opener script 
-#!/usr/bin/env bash
+
+# NEW VERSION - Original backed up to: orig.archive-branches_2025-04-23_17-39.sh 
+# Version date: Wed Apr 23 05:39:45 PM EDT 2025 
+# Git branch: enhancement/git-archive 
+# Last commit: Add GitHub repo opener script 
+#!/bin/zsh
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 # 🧹 Git Branch Archiver – archive-branches.sh
 # Safely archives remote branches and cleans up local ones
 # Logs activity to ~/git-branch-archive/logs/
 # Author: Trauco (trau.co)
-# Works in both Bash and Zsh (arrays/regex OK)
 # ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-set -euo pipefail
+set -e
 
-# --- if invoked by a shell that is NOT bash or zsh, re-exec with bash ----------
-if [[ -z "${BASH_VERSION-}" && -z "${ZSH_VERSION-}" ]]; then
-  exec bash "$0" "$@"
-fi
-
-# Protected branches – never touched
+# Branches that must never be touched
 protected_branches=("develop" "main" "master")
 default_branch="develop"
 
@@ -25,7 +24,7 @@ timestamp=$(date "+%Y-%m-%d_%H-%M-%S")
 log_dir="$HOME/git-branch-archive/logs"
 log_file="$log_dir/archive-log-$timestamp.log"
 
-# ANSI colours
+# ANSI colors
 GREEN=$'\e[32m'; YELLOW=$'\e[33m'; RED=$'\e[31m'; BLUE=$'\e[34m'; NC=$'\e[0m'
 
 mkdir -p "$log_dir"
@@ -35,17 +34,19 @@ protected_regex="$(printf '^%s$|' "${protected_branches[@]}")"
 protected_regex="${protected_regex%|}"
 
 # All local branches except the protected ones
-mapfile -t branches < <(git for-each-ref --format='%(refname:short)' refs/heads | grep -Ev "(${protected_regex})")
+branches=(
+  $(git for-each-ref --format='%(refname:short)' refs/heads | grep -Ev "(${protected_regex})")
+)
 
 if [[ ${#branches[@]} -eq 0 ]]; then
   printf "${YELLOW}⚠️  No local branches to process.${NC}\n"
   exit 0
 fi
 
-printf "\n${BLUE}🔍  Local branches to archive/delete:${NC}\n"
-printf ' - %s\n' "${branches[@]}"
+printf "\n${BLUE}🔍 The following local branches were found:${NC}\n"
+for b in "${branches[@]}"; do printf " - %s\n" "$b"; done
 
-printf "\n${YELLOW}⚠️  Archive matching remote branches and delete these local branches? (y/n) ${NC}"
+printf "\n${YELLOW}⚠️  Archive remote branches and delete these local branches? (y/n) ${NC}"
 read -r confirm
 if [[ ! "$confirm" =~ ^[yY]$ ]]; then
   printf "${RED}❌  Operation cancelled.${NC}\n"
