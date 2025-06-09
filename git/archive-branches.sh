@@ -6,7 +6,7 @@
 # Make sure this runs with bash, not sh
 
 # Use space-separated string instead of array for sh compatibility
-protected_branches="develop main master"
+protected_branches="develop main master feature/real-bq-data"
 timestamp=$(date "+%Y-%m-%d_%H-%M-%S")
 log_dir="$HOME/git-branch-archive/logs"
 log_file="$log_dir/archive-log-$timestamp.log"
